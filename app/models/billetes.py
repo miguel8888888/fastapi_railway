@@ -9,5 +9,7 @@ class Billete(Base):
     anverso = Column(String, nullable=False)
     reverso = Column(String, nullable=False)
     pais = Column(Integer, ForeignKey("paises.id"), nullable=False)
+    denominacion = Column(String, nullable=False)
+    precio = Column(String, nullable=False)
 
     pais_rel = relationship("Pais", backref="billetes")

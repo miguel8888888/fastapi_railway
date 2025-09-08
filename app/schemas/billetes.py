@@ -5,6 +5,8 @@ class BilleteBase(BaseModel):
     anverso: str
     reverso: str
     pais: int
+    denominacion: str
+    precio: str
 
 class BilleteCreate(BilleteBase):
     pass
