@@ -12,6 +12,7 @@ class BilleteCreate(BilleteBase):
 class BilletePais(BaseModel):
     id: int
     pais: str
+    bandera: str
 
     class Config:
         orm_mode = True
