@@ -17,11 +17,11 @@ class BilletePais(BaseModel):
     bandera: str
 
     class Config:
-        orm_mode = True
+        from_attributes  = True
 
 class Billete(BilleteBase):
     id: int
     pais_rel: Optional[BilletePais] = None
 
     class Config:
-        orm_mode = True
+        from_attributes  = True
