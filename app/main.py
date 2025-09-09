@@ -42,7 +42,7 @@ async def upload_file(file: UploadFile = File(...)):
     file_location = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_location, "wb") as f:
         f.write(await file.read())
-    return {"url": f"/uploads/{file.filename}"}
+    return {"url": f"uploads/{file.filename}"}
 
 # Routers
 app.include_router(pais.router)
