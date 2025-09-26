@@ -7,11 +7,3 @@ services:
     envVars:
       - key: DATABASE_URL
         value: "postgresql://db_numismatica_user:F0TkUKIbTcCBMyIofXnHyRHNNfEVU3Uy@dpg-d39jv3c9c44c73fjhrsg-a.oregon-postgres.render.com/db_numismatica"
-        fromDatabase:
-          name: billetes-db
-          property: connectionString
-
-databases:
-  - name: billetes-db
-    databaseName: billetes
-    user: billetes_user
