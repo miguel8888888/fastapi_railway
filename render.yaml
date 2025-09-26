@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: fastapi-numismatica-api
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-    envVars:
-      - key: DATABASE_URL
-        value: "postgresql://db_numismatica_user:F0TkUKIbTcCBMyIofXnHyRHNNfEVU3Uy@dpg-d39jv3c9c44c73fjhrsg-a.oregon-postgres.render.com/db_numismatica"
