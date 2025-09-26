@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🔹 Middleware para evitar cache en Railway / navegadores
+# 🔹 Middleware para evitar cache
 @app.middleware("http")
 async def add_no_cache_headers(request, call_next):
     response = await call_next(request)
@@ -29,8 +29,8 @@ async def add_no_cache_headers(request, call_next):
     response.headers["Expires"] = "0"
     return response
 
-# 🔹 Configuración de uploads con Railway Volumes
-UPLOAD_DIR = "/app/uploads"  # ruta del volumen en Railway
+# 🔹 Configuración de uploads para Render (temporal storage)
+UPLOAD_DIR = "./uploads"  # directorio temporal en Render
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Servir archivos estáticos
