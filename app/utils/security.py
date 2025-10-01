@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 import secrets
 import string
+import hashlib
 from fastapi import HTTPException, status
 
 # Configuración de bcrypt con salt rounds >= 12
@@ -11,10 +12,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds
 
 def hash_password(password: str) -> str:
     """Hashea una contraseña usando bcrypt con salt rounds >= 12"""
+    # Truncar a 72 bytes si es necesario (límite de bcrypt)
+    if len(password.encode('utf-8')) > 72:
+        password = password[:72]
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica una contraseña contra su hash"""
+    # Truncar a 72 bytes si es necesario (límite de bcrypt)
+    if len(plain_password.encode('utf-8')) > 72:
+        plain_password = plain_password[:72]
     return pwd_context.verify(plain_password, hashed_password)
 
 def generate_reset_token() -> str:

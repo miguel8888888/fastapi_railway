@@ -28,10 +28,14 @@ def create_default_admin():
         existing_admin = db.query(Usuario).filter(Usuario.email == "admin@numismatica.com").first()
         
         if existing_admin:
-            print("✅ El usuario administrador ya existe.")
+            # Actualizar el usuario existente con el hash correcto
+            existing_admin.password_hash = hash_password("admin123")
+            db.commit()
+            print("✅ Usuario administrador actualizado.")
             print(f"   Email: {existing_admin.email}")
             print(f"   Nombre: {existing_admin.nombre}")
             print(f"   Rol: {existing_admin.role.value}")
+            print("🔐 Contraseña actualizada correctamente.")
             return
         
         # Crear usuario administrador
