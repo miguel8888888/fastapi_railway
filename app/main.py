@@ -4,6 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
 from app.routers import pais
 from app.routers import billetes
+from app.routers import auth
+from app.routers import users
 import os
 
 # Crear tablas automáticamente si no existen
@@ -19,6 +21,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 🔹 Middleware de seguridad adicional
+# En producción, configura TrustedHost y otros middlewares de seguridad
 
 # 🔹 Middleware para evitar cache
 @app.middleware("http")
@@ -45,6 +50,8 @@ async def upload_file(file: UploadFile = File(...)):
     return {"url": f"uploads/{file.filename}"}
 
 # Routers
+app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(pais.router)
 app.include_router(billetes.router)
 
