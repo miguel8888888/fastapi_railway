@@ -179,3 +179,32 @@ async def test_email_config(
         "message": "Prueba de email iniciada. Revisa tu bandeja de entrada.",
         "email": current_user.email
     }
+
+@router.post("/test-emailjs/")
+async def test_emailjs_config(
+    current_user: Usuario = Depends(get_current_active_user)
+):
+    """Endpoint para probar configuración de EmailJS"""
+    
+    if current_user.role.value not in ["admin", "super_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo administradores pueden probar EmailJS"
+        )
+    
+    from app.utils.email_emailjs import test_emailjs_config
+    
+    # Probar EmailJS
+    success = test_emailjs_config()
+    
+    if success:
+        return {
+            "message": "Email de prueba EmailJS enviado exitosamente",
+            "email": current_user.email,
+            "service": "EmailJS"
+        }
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error enviando email de prueba con EmailJS"
+        )

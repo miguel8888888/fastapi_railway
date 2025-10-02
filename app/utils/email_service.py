@@ -74,29 +74,40 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     </html>
     """
     
-    # Estrategia de envío: SendGrid -> FormSubmit -> SMTP
+    # Estrategia de envío: EmailJS -> SendGrid -> FormSubmit -> SMTP
     success = False
     
-    # 1. Intentar SendGrid primero (si está configurado)
-    if os.getenv("SENDGRID_API_KEY"):
+    # 1. Intentar EmailJS primero (envío directo, gratuito, funciona en Render)
+    if os.getenv("EMAILJS_SERVICE_ID"):
+        logger.info("Intentando EmailJS...")
+        success = send_email_emailjs(
+            to_email=email,
+            subject=subject,
+            html_content=html_content,
+            nombre=nombre
+        )
+    
+    # 2. Si no funciona, intentar SendGrid (si está configurado)
+    if not success and os.getenv("SENDGRID_API_KEY"):
+        logger.info("EmailJS falló, intentando SendGrid...")
         success = send_email_sendgrid(
             to_email=email,
             subject=subject,
             html_content=html_content
         )
     
-    # 2. Si no funciona, intentar FormSubmit (gratuito, funciona en Render)
+    # 3. Si no funciona, intentar FormSubmit (te envía a ti)
     if not success:
-        logger.info("Intentando FormSubmit como fallback gratuito...")
+        logger.info("Intentando FormSubmit como fallback...")
         success = send_email_formsubmit(
             to_email=email,
             subject=subject,
             html_content=html_content
         )
     
-    # 3. Si tampoco funciona, intentar SMTP (puede fallar en Render)
+    # 4. Último recurso: SMTP (puede fallar en Render)
     if not success:
-        logger.info("FormSubmit falló, intentando SMTP como último recurso...")
+        logger.info("Intentando SMTP como último recurso...")
         try:
             success = send_email_smtp(
                 to_email=email,
@@ -292,6 +303,38 @@ def send_email_formsubmit(to_email: str, subject: str, html_content: str) -> boo
             
     except Exception as e:
         logger.error(f"Error enviando email via FormSubmit: {e}")
+        return False
+
+def send_email_emailjs(to_email: str, subject: str, html_content: str, nombre: str = "Usuario") -> bool:
+    """
+    Envía email usando EmailJS - Envío directo al usuario final
+    """
+    
+    try:
+        # Importar la función EmailJS
+        from app.utils.email_emailjs import send_email_emailjs as emailjs_send
+        
+        # Convertir HTML a texto para el mensaje
+        plain_text = re.sub('<[^<]+?>', '', html_content)
+        plain_text = plain_text.replace('&nbsp;', ' ').strip()
+        
+        # Extraer URL de reset si existe
+        reset_url = None
+        url_match = re.search(r'http[s]?://[^\s<>"]+reset-password[^\s<>"]*', html_content)
+        if url_match:
+            reset_url = url_match.group()
+        
+        # Enviar via EmailJS
+        return emailjs_send(
+            to_email=to_email,
+            to_name=nombre,
+            subject=subject,
+            message=plain_text,
+            reset_url=reset_url
+        )
+        
+    except Exception as e:
+        logger.error(f"Error enviando email via EmailJS: {e}")
         return False
 
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
