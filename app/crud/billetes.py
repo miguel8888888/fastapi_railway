@@ -13,7 +13,7 @@ def get_billetes(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Billete).options(joinedload(Billete.pais_rel)).offset(skip).limit(limit).all()
 
 def get_billete(db: Session, billete_id: int):
-    return db.query(Billete).options(joinedload(Billete.pais_rel)).filter(Billete.id == billete_id).first()
+    return db.query(Billete).filter(Billete.id == billete_id).options(joinedload(Billete.pais_rel)).first()
 
 def update_billete(db: Session, billete_id: int, billete_data: BilleteCreate):
     billete = db.query(Billete).filter(Billete.id == billete_id).first()
