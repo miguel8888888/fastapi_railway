@@ -217,7 +217,7 @@ def clean_expired_tokens(db: Session):
     db.commit()
 
 # Rate limiting
-def check_rate_limit(db: Session, ip_address: str, max_attempts: int = 5, window_hours: int = 1) -> bool:
+def check_rate_limit(db: Session, ip_address: str, max_attempts: int = 20, window_hours: int = 1) -> bool:
     """Verifica límite de intentos por IP"""
     since = datetime.utcnow() - timedelta(hours=window_hours)
     
