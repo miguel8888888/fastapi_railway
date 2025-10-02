@@ -12,6 +12,7 @@ from app.crud.auth import (
 )
 from app.utils.jwt_handler import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.utils.auth_dependencies import get_current_active_user, get_client_info, rate_limit_check
+from app.utils.email_service import send_reset_email
 from app.models.usuarios import Usuario
 
 router = APIRouter(
@@ -100,8 +101,13 @@ async def forgot_password(
         user_agent=user_agent
     )
     
-    # Aquí deberías enviar el email con el token
-    # background_tasks.add_task(send_reset_email, user.email, reset_token)
+    # Enviar email con el token de recuperación
+    background_tasks.add_task(
+        send_reset_email, 
+        user.email, 
+        reset_token, 
+        f"{user.nombre} {user.apellidos or ''}".strip() or "Usuario"
+    )
     
     # Limpiar tokens expirados en background
     background_tasks.add_task(clean_expired_tokens, db)
@@ -150,3 +156,26 @@ async def get_current_user_info(
 ):
     """Obtener información del usuario actual"""
     return UserResponse.from_orm(current_user)
+
+@router.post("/test-email/")
+async def test_email_config(
+    background_tasks: BackgroundTasks,
+    current_user: Usuario = Depends(get_current_active_user)
+):
+    """Endpoint para probar configuración de email (solo para administradores)"""
+    
+    if current_user.role.value not in ["admin", "super_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo administradores pueden probar la configuración de email"
+        )
+    
+    from app.utils.email_service import test_email_configuration
+    
+    # Probar configuración en background
+    background_tasks.add_task(test_email_configuration)
+    
+    return {
+        "message": "Prueba de email iniciada. Revisa tu bandeja de entrada.",
+        "email": current_user.email
+    }

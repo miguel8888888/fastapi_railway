@@ -1,5 +1,13 @@
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from typing import Optional
+import logging
+
+# Configurar logging para emails
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     """
@@ -64,42 +72,28 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     </html>
     """
     
-    # TODO: Implementar envío real del email
-    # Ejemplo con SendGrid:
-    # import sendgrid
-    # from sendgrid.helpers.mail import Mail
-    # 
-    # sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-    # from_email = os.environ.get('FROM_EMAIL', 'noreply@tudominio.com')
-    # 
-    # message = Mail(
-    #     from_email=from_email,
-    #     to_emails=email,
-    #     subject=subject,
-    #     html_content=html_content
-    # )
-    # 
-    # try:
-    #     response = sg.send(message)
-    #     return True
-    # except Exception as e:
-    #     print(f"Error sending email: {e}")
-    #     return False
-    
-    # Por ahora, solo imprimimos en consola para desarrollo
-    print(f"""
-    ==================== EMAIL DE RECUPERACIÓN ====================
-    Para: {email}
-    Asunto: {subject}
-    
-    Token: {token}
-    URL de reset: {reset_url}
-    
-    En producción, este email se enviaría automáticamente.
-    ===============================================================
-    """)
-    
-    return True
+    # Implementación con Gmail SMTP
+    try:
+        return send_email_smtp(
+            to_email=email,
+            subject=subject,
+            html_content=html_content
+        )
+    except Exception as e:
+        logger.error(f"Error enviando email de recuperación a {email}: {e}")
+        # En desarrollo, mostrar en consola como fallback
+        print(f"""
+        ==================== EMAIL DE RECUPERACIÓN ====================
+        Para: {email}
+        Asunto: {subject}
+        
+        Token: {token}
+        URL de reset: {reset_url}
+        
+        Error enviando email: {e}
+        ===============================================================
+        """)
+        return False
 
 def send_welcome_email(email: str, nombre: str, password: str):
     """
@@ -141,15 +135,103 @@ def send_welcome_email(email: str, nombre: str, password: str):
     </html>
     """
     
-    print(f"""
-    ==================== EMAIL DE BIENVENIDA ====================
-    Para: {email}
-    Asunto: {subject}
+    # Implementación con Gmail SMTP para bienvenida
+    try:
+        return send_email_smtp(
+            to_email=email,
+            subject=subject,
+            html_content=html_content
+        )
+    except Exception as e:
+        logger.error(f"Error enviando email de bienvenida a {email}: {e}")
+        # En desarrollo, mostrar en consola como fallback
+        print(f"""
+        ==================== EMAIL DE BIENVENIDA ====================
+        Para: {email}
+        Asunto: {subject}
+        
+        Credenciales:
+        Email: {email}
+        Contraseña temporal: {password}
+        
+        Error enviando email: {e}
+        ===============================================================
+        """)
+        return False
+
+def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
+    """
+    Envía email usando Gmail SMTP
+    """
     
-    Credenciales:
-    Email: {email}
-    Contraseña temporal: {password}
-    ===============================================================
-    """)
+    # Configuraciones SMTP de Gmail
+    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    email_user = os.getenv("EMAIL_USER")
+    email_password = os.getenv("EMAIL_PASSWORD")
+    from_email = os.getenv("FROM_EMAIL", email_user)
     
-    return True
+    if not email_user or not email_password:
+        logger.error("Credenciales de email no configuradas en variables de entorno")
+        return False
+    
+    try:
+        # Crear mensaje
+        message = MIMEMultipart("alternative")
+        message["Subject"] = subject
+        message["From"] = from_email
+        message["To"] = to_email
+        
+        # Agregar contenido HTML
+        html_part = MIMEText(html_content, "html", "utf-8")
+        message.attach(html_part)
+        
+        # Conectar y enviar
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Habilitar seguridad TLS
+            server.login(email_user, email_password)
+            server.sendmail(from_email, to_email, message.as_string())
+        
+        logger.info(f"Email enviado exitosamente a {to_email}")
+        return True
+        
+    except smtplib.SMTPAuthenticationError:
+        logger.error("Error de autenticación SMTP - Verifica las credenciales de Gmail")
+        return False
+    except smtplib.SMTPRecipientsRefused:
+        logger.error(f"Email rechazado: {to_email}")
+        return False
+    except Exception as e:
+        logger.error(f"Error general enviando email: {e}")
+        return False
+
+def test_email_configuration() -> bool:
+    """
+    Prueba la configuración de email enviando un email de prueba
+    """
+    
+    email_user = os.getenv("EMAIL_USER")
+    if not email_user:
+        logger.error("EMAIL_USER no configurado")
+        return False
+    
+    test_subject = "Prueba de Configuración SMTP - Sistema Numismática"
+    test_content = """
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #28a745; text-align: center;">✅ Configuración SMTP Exitosa</h2>
+            <p>Este es un email de prueba para verificar que la configuración de Gmail SMTP está funcionando correctamente.</p>
+            <p><strong>Sistema:</strong> Sistema Numismática</p>
+            <p><strong>Fecha:</strong> {}</p>
+        </div>
+    </body>
+    </html>
+    """.format(os.popen('date /t').read().strip() if os.name == 'nt' else os.popen('date').read().strip())
+    
+    return send_email_smtp(
+        to_email=email_user,  # Enviar a uno mismo como prueba
+        subject=test_subject,
+        html_content=test_content
+    )
