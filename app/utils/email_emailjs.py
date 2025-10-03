@@ -39,13 +39,15 @@ def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, 
             "subject": subject,
             "message": message,
             "from_name": "Sistema Numismática",
-            "from_email": "miguelsgap@gmail.com"
+            "from_email": "miguelsgap@gmail.com",
+            "reply_to": "miguelsgap@gmail.com"
         }
         
         # Si hay URL de reset, agregarla
         if reset_url:
             template_params["reset_url"] = reset_url
-            template_params["reset_link"] = f'<a href="{reset_url}">Restablecer Contraseña</a>'
+            template_params["reset_link"] = f'<a href="{reset_url}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Restablecer Contraseña</a>'
+            template_params["reset_button"] = f'{reset_url}'
         
         # Payload para EmailJS 
         payload = {
@@ -63,6 +65,9 @@ def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, 
         headers = {
             "Content-Type": "application/json"
         }
+        
+        # Log para debug
+        logger.info(f"Enviando email a {to_email} con URL: {reset_url if reset_url else 'sin URL'}")
         
         # Enviar request
         response = requests.post(

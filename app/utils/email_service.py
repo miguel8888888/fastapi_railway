@@ -26,6 +26,11 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:4200")
     reset_url = f"{frontend_url}/auth/reset-password?token={token}"
     
+    # Log para debug de la URL
+    logger.info(f"Enviando email de recuperación a {email}")
+    logger.info(f"Frontend URL configurada: {frontend_url}")
+    logger.info(f"URL completa de reset: {reset_url}")
+    
     # Template del email
     subject = "Recuperación de Contraseña - Sistema Numismático"
     
@@ -35,31 +40,42 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     <head>
         <meta charset="UTF-8">
         <title>Recuperación de Contraseña</title>
+        <style>
+            .btn {{
+                background-color: #007bff !important;
+                color: white !important;
+                padding: 12px 24px !important;
+                text-decoration: none !important;
+                border-radius: 4px !important;
+                display: inline-block !important;
+                font-weight: bold !important;
+            }}
+        </style>
     </head>
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-            <h2 style="color: #333; text-align: center;">Recuperación de Contraseña</h2>
+            <h2 style="color: #333; text-align: center;">🔐 Recuperación de Contraseña</h2>
             
             <p>Hola <strong>{nombre}</strong>,</p>
             
             <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en el Sistema Numismático.</p>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="{reset_url}" 
-                   style="background-color: #007bff; color: white; padding: 12px 24px; 
-                          text-decoration: none; border-radius: 4px; display: inline-block;">
-                    Restablecer Contraseña
+                <a href="{reset_url}" class="btn" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">
+                    🔑 Restablecer Contraseña
                 </a>
             </div>
             
-            <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
-            <p style="background-color: #e9ecef; padding: 10px; border-radius: 4px; word-break: break-all;">
-                {reset_url}
-            </p>
+            <p><strong>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</strong></p>
+            <div style="background-color: #e9ecef; padding: 15px; border-radius: 4px; border-left: 4px solid #007bff;">
+                <a href="{reset_url}" style="color: #007bff; word-break: break-all;">
+                    {reset_url}
+                </a>
+            </div>
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
                 <p style="color: #6c757d; font-size: 14px;">
-                    <strong>Importante:</strong>
+                    <strong>⚠️ Importante:</strong>
                     <br>• Este enlace expira en 24 horas
                     <br>• Si no solicitaste este cambio, puedes ignorar este email
                     <br>• Por tu seguridad, no compartas este enlace con nadie
@@ -67,7 +83,7 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
             </div>
             
             <p style="color: #6c757d; font-size: 12px; text-align: center; margin-top: 20px;">
-                Sistema Numismático - Gestión de Colecciones
+                🪙 Sistema Numismático - Gestión de Colecciones
             </p>
         </div>
     </body>
