@@ -30,7 +30,12 @@ def create_user(db: Session, user: UserCreate) -> Usuario:
         nombre=user.nombre,
         apellidos=user.apellidos,
         role=user.role,
-        activo=user.activo
+        activo=user.activo,
+        # 🆕 NUEVOS CAMPOS
+        telefono=user.telefono,
+        ciudad=user.ciudad,
+        direccion=user.direccion,
+        pais=user.pais
     )
     db.add(db_user)
     db.commit()
@@ -48,6 +53,38 @@ def get_user_by_email(db: Session, email: str) -> Optional[Usuario]:
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[Usuario]:
     """Obtiene lista de usuarios"""
     return db.query(Usuario).offset(skip).limit(limit).all()
+
+def search_users(db: Session, query: str, skip: int = 0, limit: int = 100) -> List[Usuario]:
+    """Buscar usuarios por nombre, email, ciudad o país"""
+    search_term = f"%{query}%"
+    return db.query(Usuario).filter(
+        or_(
+            Usuario.nombre.ilike(search_term),
+            Usuario.apellidos.ilike(search_term),
+            Usuario.email.ilike(search_term),
+            Usuario.ciudad.ilike(search_term),
+            Usuario.pais.ilike(search_term)
+        )
+    ).offset(skip).limit(limit).all()
+
+def update_user_profile(db: Session, user_id: UUID, profile_update: dict) -> Usuario:
+    """Actualiza el perfil de un usuario (campos no administrativos)"""
+    db_user = get_user(db, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+    
+    # Solo actualizar campos permitidos del perfil
+    allowed_fields = ['nombre', 'apellidos', 'telefono', 'ciudad', 'direccion', 'pais']
+    for field, value in profile_update.items():
+        if field in allowed_fields and hasattr(db_user, field):
+            setattr(db_user, field, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 def update_user(db: Session, user_id: UUID, user_update: UserUpdate) -> Usuario:
     """Actualiza un usuario"""

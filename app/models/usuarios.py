@@ -19,6 +19,13 @@ class Usuario(Base):
     apellidos = Column(String(100))
     role = Column(SQLEnum(UserRole), default=UserRole.admin)
     activo = Column(Boolean, default=True, index=True)
+    
+    # 🆕 NUEVOS CAMPOS DE INFORMACIÓN PERSONAL
+    telefono = Column(String(20), nullable=True)      # Teléfono opcional
+    ciudad = Column(String(100), nullable=True)       # Ciudad opcional
+    direccion = Column(String(500), nullable=True)    # Dirección opcional
+    pais = Column(String(100), nullable=True)         # País opcional
+    
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
     fecha_actualizacion = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     ultimo_login = Column(DateTime(timezone=True), nullable=True)

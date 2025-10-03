@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
 from app.schemas.auth import UserCreate, UserUpdate, UserResponse, UserResetPassword
 from app.crud.auth import (
     create_user, get_users, get_user, update_user, 
-    delete_user, reset_user_password
+    delete_user, reset_user_password, search_users
 )
 from app.utils.auth_dependencies import (
     require_admin, require_super_admin, get_current_active_user
@@ -23,11 +23,15 @@ router = APIRouter(
 async def list_users(
     skip: int = 0,
     limit: int = 100,
+    search: Optional[str] = Query(None, description="Buscar por nombre, email, ciudad o país"),
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(require_admin)
 ):
-    """Listar usuarios (solo admins)"""
-    users = get_users(db, skip=skip, limit=limit)
+    """Listar usuarios con búsqueda opcional (solo admins)"""
+    if search:
+        users = search_users(db, query=search, skip=skip, limit=limit)
+    else:
+        users = get_users(db, skip=skip, limit=limit)
     return [UserResponse.from_orm(user) for user in users]
 
 @router.post("/", response_model=UserResponse)

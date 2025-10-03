@@ -4,11 +4,12 @@ from datetime import timedelta
 from app.database import get_db
 from app.schemas.auth import (
     LoginRequest, LoginResponse, ForgotPasswordRequest, 
-    ResetPasswordRequest, UserResponse
+    ResetPasswordRequest, UserResponse, UserProfileUpdate
 )
 from app.crud.auth import (
     authenticate_user, create_reset_token, verify_reset_token, 
-    use_reset_token, get_user_by_email, clean_expired_tokens
+    use_reset_token, get_user_by_email, clean_expired_tokens,
+    update_user_profile
 )
 from app.utils.jwt_handler import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.utils.auth_dependencies import get_current_active_user, get_client_info, rate_limit_check
@@ -208,3 +209,27 @@ async def test_emailjs_config(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error enviando email de prueba con EmailJS"
         )
+
+# 🆕 NUEVOS ENDPOINTS PARA GESTIÓN DE PERFIL
+
+@router.get("/perfil/", response_model=UserResponse)
+async def obtener_perfil(
+    current_user: Usuario = Depends(get_current_active_user)
+):
+    """Obtener perfil completo del usuario actual"""
+    return current_user
+
+@router.put("/perfil/", response_model=UserResponse)
+async def actualizar_perfil(
+    perfil_data: UserProfileUpdate,
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Actualizar perfil del usuario actual (incluyendo nuevos campos)
+    """
+    # Convertir a dict excluyendo valores no establecidos
+    update_data = perfil_data.model_dump(exclude_unset=True)
+    
+    usuario_actualizado = update_user_profile(db, current_user.id, update_data)
+    return usuario_actualizado

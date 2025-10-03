@@ -31,6 +31,11 @@ class UserBase(BaseModel):
     apellidos: Optional[str] = None
     role: UserRole = UserRole.admin
     activo: bool = True
+    # 🆕 NUEVOS CAMPOS OPCIONALES
+    telefono: Optional[str] = None
+    ciudad: Optional[str] = None
+    direccion: Optional[str] = None
+    pais: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -41,6 +46,20 @@ class UserUpdate(BaseModel):
     apellidos: Optional[str] = None
     role: Optional[UserRole] = None
     activo: Optional[bool] = None
+    # 🆕 NUEVOS CAMPOS OPCIONALES PARA ACTUALIZACIÓN
+    telefono: Optional[str] = None
+    ciudad: Optional[str] = None
+    direccion: Optional[str] = None
+    pais: Optional[str] = None
+
+# 🆕 ESQUEMA PARA ACTUALIZAR PERFIL DE USUARIO (sin campos administrativos)
+class UserProfileUpdate(BaseModel):
+    nombre: Optional[str] = None
+    apellidos: Optional[str] = None
+    telefono: Optional[str] = None
+    ciudad: Optional[str] = None
+    direccion: Optional[str] = None
+    pais: Optional[str] = None
 
 class UserResponse(UserBase):
     id: UUID4
