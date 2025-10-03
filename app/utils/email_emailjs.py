@@ -6,6 +6,7 @@ EmailJS permite enviar emails directamente sin backend SMTP
 import os
 import requests
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -32,22 +33,40 @@ def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, 
         # Endpoint de EmailJS
         url = "https://api.emailjs.com/api/v1.0/email/send"
         
-        # Datos del template
+        # Datos del template - usar solo texto plano para EmailJS
         template_params = {
             "to_email": to_email,
             "to_name": to_name,
             "subject": subject,
-            "message": message,
+            "message": message,  # Usar el mensaje original
             "from_name": "Sistema Numismática",
             "from_email": "miguelsgap@gmail.com",
             "reply_to": "miguelsgap@gmail.com"
         }
         
-        # Si hay URL de reset, agregarla
+        # Si hay URL de reset, agregarla como texto plano
         if reset_url:
             template_params["reset_url"] = reset_url
-            template_params["reset_link"] = f'<a href="{reset_url}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Restablecer Contraseña</a>'
-            template_params["reset_button"] = f'{reset_url}'
+            template_params["reset_link"] = f"Restablecer Contraseña: {reset_url}"
+            template_params["reset_button"] = reset_url
+            # Mensaje personalizado para recuperación sin HTML
+            clean_message = f"""Hola {to_name},
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta en el Sistema Numismático.
+
+HAZ CLIC AQUI PARA RESTABLECER: {reset_url}
+
+O copia y pega este enlace en tu navegador:
+{reset_url}
+
+⚠️ IMPORTANTE:
+• Este enlace expira en 24 horas
+• Si no solicitaste este cambio, ignora este email
+• Por tu seguridad, no compartas este enlace
+
+Sistema Numismático - Gestión de Colecciones"""
+            
+            template_params["message"] = clean_message
         
         # Payload para EmailJS 
         payload = {
