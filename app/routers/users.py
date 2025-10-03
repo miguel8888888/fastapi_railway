@@ -14,7 +14,7 @@ from app.models.usuarios import Usuario
 from uuid import UUID
 
 router = APIRouter(
-    prefix="/auth/users",
+    prefix="/usuarios",
     tags=["Gestión de Usuarios"],
     dependencies=[Depends(require_admin)]
 )

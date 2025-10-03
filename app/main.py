@@ -58,3 +58,28 @@ app.include_router(billetes.router)
 @app.get("/")
 def root():
     return {"message": "API funcionando correctamente"}
+
+# 🆕 ENDPOINT DE VERIFICACIÓN - Para comprobar que los nuevos endpoints están disponibles
+@app.get("/api/info")
+def api_info():
+    """Información sobre los endpoints disponibles"""
+    return {
+        "message": "API Sistema Numismático",
+        "version": "2.0.0",
+        "nuevos_endpoints": {
+            "usuarios": {
+                "GET /usuarios/": "Listar usuarios con búsqueda opcional (admin)",
+                "GET /usuarios/?search=término": "Buscar usuarios por nombre, email, ciudad o país",
+                "POST /usuarios/": "Crear nuevo usuario (admin)",
+                "GET /usuarios/{id}": "Obtener usuario por ID (admin)",
+                "PUT /usuarios/{id}": "Actualizar usuario (admin)",
+                "DELETE /usuarios/{id}": "Eliminar usuario (admin)"
+            },
+            "perfil": {
+                "GET /auth/perfil/": "Obtener perfil del usuario actual",
+                "PUT /auth/perfil/": "Actualizar perfil (telefono, ciudad, direccion, pais)"
+            }
+        },
+        "nuevos_campos_usuario": ["telefono", "ciudad", "direccion", "pais"],
+        "documentacion": "/docs"
+    }
