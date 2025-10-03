@@ -4,12 +4,12 @@ from datetime import timedelta
 from app.database import get_db
 from app.schemas.auth import (
     LoginRequest, LoginResponse, ForgotPasswordRequest, 
-    ResetPasswordRequest, UserResponse, UserProfileUpdate
+    ResetPasswordRequest, UserResponse, UserProfileUpdate, ChangePasswordRequest
 )
 from app.crud.auth import (
     authenticate_user, create_reset_token, verify_reset_token, 
     use_reset_token, get_user_by_email, clean_expired_tokens,
-    update_user_profile
+    update_user_profile, change_user_password
 )
 from app.utils.jwt_handler import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.utils.auth_dependencies import get_current_active_user, get_client_info, rate_limit_check
@@ -233,3 +233,34 @@ async def actualizar_perfil(
     
     usuario_actualizado = update_user_profile(db, current_user.id, update_data)
     return usuario_actualizado
+
+@router.put("/cambiar-password/")
+async def cambiar_password(
+    password_data: ChangePasswordRequest,
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Cambiar contraseña del usuario actual
+    Requiere la contraseña actual para validación de seguridad
+    """
+    
+    # Validar que las nuevas contraseñas coincidan
+    if password_data.new_password != password_data.confirm_new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La nueva contraseña y su confirmación no coinciden"
+        )
+    
+    # Cambiar contraseña
+    change_user_password(
+        db=db,
+        user_id=current_user.id,
+        current_password=password_data.current_password,
+        new_password=password_data.new_password
+    )
+    
+    return {
+        "message": "Contraseña cambiada exitosamente",
+        "email": current_user.email
+    }

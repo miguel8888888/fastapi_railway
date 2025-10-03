@@ -78,6 +78,9 @@ def api_info():
             "perfil": {
                 "GET /auth/perfil/": "Obtener perfil del usuario actual",
                 "PUT /auth/perfil/": "Actualizar perfil (email, nombre, apellidos, telefono, ciudad, direccion, pais)"
+            },
+            "seguridad": {
+                "PUT /auth/cambiar-password/": "Cambiar contraseña (requiere contraseña actual)"
             }
         },
         "campos_editables_perfil": ["email", "nombre", "apellidos", "telefono", "ciudad", "direccion", "pais"],

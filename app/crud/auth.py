@@ -99,6 +99,38 @@ def update_user_profile(db: Session, user_id: UUID, profile_update: dict) -> Usu
     db.refresh(db_user)
     return db_user
 
+def change_user_password(db: Session, user_id: UUID, current_password: str, new_password: str) -> Usuario:
+    """Cambiar contraseña del usuario (requiere contraseña actual)"""
+    db_user = get_user(db, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+    
+    # Verificar contraseña actual
+    if not verify_password(current_password, db_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña actual es incorrecta"
+        )
+    
+    # Validar fortaleza de la nueva contraseña
+    validate_password_strength(new_password)
+    
+    # Verificar que la nueva contraseña sea diferente a la actual
+    if verify_password(new_password, db_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La nueva contraseña debe ser diferente a la actual"
+        )
+    
+    # Actualizar contraseña
+    db_user.password_hash = hash_password(new_password)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 def update_user(db: Session, user_id: UUID, user_update: UserUpdate) -> Usuario:
     """Actualiza un usuario"""
     db_user = get_user(db, user_id)

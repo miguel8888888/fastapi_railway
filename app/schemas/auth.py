@@ -74,6 +74,12 @@ class UserResponse(UserBase):
 class UserResetPassword(BaseModel):
     new_password: str
 
+# 🆕 ESQUEMA PARA CAMBIO DE CONTRASEÑA (usuario logueado)
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_new_password: str
+
 # Token schemas
 class TokenData(BaseModel):
     email: Optional[str] = None
