@@ -74,12 +74,12 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     </html>
     """
     
-    # Estrategia de envío: EmailJS -> SendGrid -> FormSubmit -> SMTP
+    # Estrategia de envío: EmailJS -> FormSubmit -> SendGrid -> SMTP
     success = False
     
-    # 1. Intentar EmailJS primero (envío directo, gratuito, funciona en Render)
+    # 1. Intentar EmailJS primero (FUNCIONA, envío directo al usuario)
     if os.getenv("EMAILJS_SERVICE_ID"):
-        logger.info("Intentando EmailJS...")
+        logger.info("Intentando EmailJS como método principal...")
         success = send_email_emailjs(
             to_email=email,
             subject=subject,
@@ -87,19 +87,19 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
             nombre=nombre
         )
     
-    # 2. Si no funciona, intentar SendGrid (si está configurado)
-    if not success and os.getenv("SENDGRID_API_KEY"):
-        logger.info("EmailJS falló, intentando SendGrid...")
-        success = send_email_sendgrid(
+    # 2. Si no funciona, usar FormSubmit como fallback (te envía a ti)
+    if not success:
+        logger.info("EmailJS falló, intentando FormSubmit...")
+        success = send_email_formsubmit(
             to_email=email,
             subject=subject,
             html_content=html_content
         )
     
-    # 3. Si no funciona, intentar FormSubmit (te envía a ti)
-    if not success:
-        logger.info("Intentando FormSubmit como fallback...")
-        success = send_email_formsubmit(
+    # 3. Si no funciona, intentar SendGrid (si está configurado)
+    if not success and os.getenv("SENDGRID_API_KEY"):
+        logger.info("Intentando SendGrid...")
+        success = send_email_sendgrid(
             to_email=email,
             subject=subject,
             html_content=html_content
@@ -325,13 +325,19 @@ def send_email_emailjs(to_email: str, subject: str, html_content: str, nombre: s
             reset_url = url_match.group()
         
         # Enviar via EmailJS
-        return emailjs_send(
+        result = emailjs_send(
             to_email=to_email,
             to_name=nombre,
             subject=subject,
             message=plain_text,
             reset_url=reset_url
         )
+        
+        # La nueva función devuelve dict, extraer success
+        if isinstance(result, dict):
+            return result.get('success', False)
+        else:
+            return bool(result)
         
     except Exception as e:
         logger.error(f"Error enviando email via EmailJS: {e}")

@@ -9,20 +9,24 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, reset_url: str = None) -> bool:
+def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, reset_url: str = None) -> dict:
     """
     Envía email usando EmailJS - Servicio gratuito con envío directo
     Límite: 200 emails/mes gratis
     """
     
-    # Configuración EmailJS (obtendrás estos valores al registrarte)
+    # Configuración EmailJS
     service_id = os.getenv("EMAILJS_SERVICE_ID", "service_xxxxxxx")
     template_id = os.getenv("EMAILJS_TEMPLATE_ID", "template_xxxxxxx") 
     public_key = os.getenv("EMAILJS_PUBLIC_KEY", "xxxxxxxxxxxxxxx")
+    private_key = os.getenv("EMAILJS_PRIVATE_KEY", "xxxxxxxxxxxxxxx")  # Clave privada para backend
     
     if not all([service_id, template_id, public_key]):
         logger.error("Credenciales EmailJS no configuradas")
-        return False
+        return {"success": False, "error": "Credenciales EmailJS no configuradas"}
+    
+    # Usar clave privada si está disponible, sino public key
+    auth_key = private_key if private_key else public_key
     
     try:
         # Endpoint de EmailJS
@@ -43,13 +47,17 @@ def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, 
             template_params["reset_url"] = reset_url
             template_params["reset_link"] = f'<a href="{reset_url}">Restablecer Contraseña</a>'
         
-        # Payload para EmailJS
+        # Payload para EmailJS 
         payload = {
             "service_id": service_id,
             "template_id": template_id,
             "user_id": public_key,
             "template_params": template_params
         }
+        
+        # Si tenemos clave privada, agregarla para llamadas de backend
+        if private_key:
+            payload["accessToken"] = private_key
         
         # Headers
         headers = {
@@ -66,17 +74,19 @@ def send_email_emailjs(to_email: str, to_name: str, subject: str, message: str, 
         
         if response.status_code == 200:
             logger.info(f"Email enviado via EmailJS a {to_email}")
-            return True
+            return {"success": True, "message": "Email enviado correctamente"}
         else:
-            logger.error(f"Error EmailJS: {response.status_code} - {response.text}")
-            return False
+            error_msg = f"Error EmailJS: {response.status_code} - {response.text}"
+            logger.error(error_msg)
+            return {"success": False, "error": error_msg}
             
     except Exception as e:
-        logger.error(f"Error enviando email via EmailJS: {e}")
-        return False
+        error_msg = f"Error enviando email via EmailJS: {e}"
+        logger.error(error_msg)
+        return {"success": False, "error": error_msg}
 
 
-def test_emailjs_config() -> bool:
+def test_emailjs_config() -> dict:
     """
     Prueba la configuración EmailJS enviando un email de prueba
     """
