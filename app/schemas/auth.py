@@ -36,6 +36,9 @@ class UserBase(BaseModel):
     ciudad: Optional[str] = None
     direccion: Optional[str] = None
     pais: Optional[str] = None
+    # 🖼️ CAMPOS PARA IMAGEN DE PERFIL
+    profile_image: Optional[str] = None
+    profile_image_path: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -51,6 +54,9 @@ class UserUpdate(BaseModel):
     ciudad: Optional[str] = None
     direccion: Optional[str] = None
     pais: Optional[str] = None
+    # 🖼️ CAMPOS PARA IMAGEN DE PERFIL
+    profile_image: Optional[str] = None
+    profile_image_path: Optional[str] = None
 
 # 🆕 ESQUEMA PARA ACTUALIZAR PERFIL DE USUARIO (sin campos administrativos)
 class UserProfileUpdate(BaseModel):
@@ -61,6 +67,9 @@ class UserProfileUpdate(BaseModel):
     ciudad: Optional[str] = None
     direccion: Optional[str] = None
     pais: Optional[str] = None
+    # 🖼️ CAMPOS PARA IMAGEN DE PERFIL DE SUPABASE
+    profile_image: Optional[str] = None
+    profile_image_path: Optional[str] = None
 
 class UserResponse(UserBase):
     id: UUID4

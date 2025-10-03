@@ -35,7 +35,10 @@ def create_user(db: Session, user: UserCreate) -> Usuario:
         telefono=user.telefono,
         ciudad=user.ciudad,
         direccion=user.direccion,
-        pais=user.pais
+        pais=user.pais,
+        # 🖼️ CAMPOS DE IMAGEN DE PERFIL
+        profile_image=user.profile_image,
+        profile_image_path=user.profile_image_path
     )
     db.add(db_user)
     db.commit()
@@ -90,7 +93,10 @@ def update_user_profile(db: Session, user_id: UUID, profile_update: dict) -> Usu
                 )
     
     # Solo actualizar campos permitidos del perfil
-    allowed_fields = ['email', 'nombre', 'apellidos', 'telefono', 'ciudad', 'direccion', 'pais']
+    allowed_fields = [
+        'email', 'nombre', 'apellidos', 'telefono', 'ciudad', 'direccion', 'pais',
+        'profile_image', 'profile_image_path'  # 🖼️ Campos de imagen de perfil
+    ]
     for field, value in profile_update.items():
         if field in allowed_fields and hasattr(db_user, field):
             setattr(db_user, field, value)

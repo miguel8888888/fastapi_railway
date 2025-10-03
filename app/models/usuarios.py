@@ -26,6 +26,10 @@ class Usuario(Base):
     direccion = Column(String(500), nullable=True)    # Dirección opcional
     pais = Column(String(100), nullable=True)         # País opcional
     
+    # 🖼️ CAMPOS PARA IMAGEN DE PERFIL (SUPABASE)
+    profile_image = Column(String(500), nullable=True)       # URL pública de Supabase
+    profile_image_path = Column(String(300), nullable=True)  # Ruta interna para eliminar
+    
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
     fecha_actualizacion = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     ultimo_login = Column(DateTime(timezone=True), nullable=True)
