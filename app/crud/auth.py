@@ -76,8 +76,21 @@ def update_user_profile(db: Session, user_id: UUID, profile_update: dict) -> Usu
             detail="Usuario no encontrado"
         )
     
+    # Verificar si se está actualizando el email y que no esté en uso
+    if 'email' in profile_update and profile_update['email']:
+        new_email = profile_update['email']
+        # Verificar que el email no sea el mismo que ya tiene
+        if new_email != db_user.email:
+            # Verificar que el nuevo email no esté en uso por otro usuario
+            existing_user = get_user_by_email(db, new_email)
+            if existing_user and existing_user.id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El email ya está en uso por otro usuario"
+                )
+    
     # Solo actualizar campos permitidos del perfil
-    allowed_fields = ['nombre', 'apellidos', 'telefono', 'ciudad', 'direccion', 'pais']
+    allowed_fields = ['email', 'nombre', 'apellidos', 'telefono', 'ciudad', 'direccion', 'pais']
     for field, value in profile_update.items():
         if field in allowed_fields and hasattr(db_user, field):
             setattr(db_user, field, value)

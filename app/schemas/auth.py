@@ -54,6 +54,7 @@ class UserUpdate(BaseModel):
 
 # 🆕 ESQUEMA PARA ACTUALIZAR PERFIL DE USUARIO (sin campos administrativos)
 class UserProfileUpdate(BaseModel):
+    email: Optional[EmailStr] = None
     nombre: Optional[str] = None
     apellidos: Optional[str] = None
     telefono: Optional[str] = None
