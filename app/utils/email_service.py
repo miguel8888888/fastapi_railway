@@ -26,64 +26,101 @@ def send_reset_email(email: str, token: str, nombre: str = "Usuario"):
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:4200")
     reset_url = f"{frontend_url}/auth/reset-password?token={token}"
     
+    # Log para debug de la URL
+    logger.info(f"Enviando email de recuperación a {email}")
+    logger.info(f"Frontend URL configurada: {frontend_url}")
+    logger.info(f"URL completa de reset: {reset_url}")
+    
     # Template del email
     subject = "Recuperación de Contraseña - Sistema Numismático"
     
+    # Template HTML simple para EmailJS (sin CSS en <head>)
     html_content = f"""
     <!DOCTYPE html>
     <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Recuperación de Contraseña</title>
-    </head>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-            <h2 style="color: #333; text-align: center;">Recuperación de Contraseña</h2>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+        <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #333; text-align: center; margin-bottom: 30px;">🔐 Recuperación de Contraseña</h2>
             
-            <p>Hola <strong>{nombre}</strong>,</p>
+            <p style="font-size: 16px; color: #333;">Hola <strong>{nombre}</strong>,</p>
             
-            <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en el Sistema Numismático.</p>
+            <p style="color: #666; line-height: 1.5;">Recibimos una solicitud para restablecer la contraseña de tu cuenta en el Sistema Numismático.</p>
             
-            <div style="text-align: center; margin: 30px 0;">
+            <div style="text-align: center; margin: 40px 0;">
                 <a href="{reset_url}" 
-                   style="background-color: #007bff; color: white; padding: 12px 24px; 
-                          text-decoration: none; border-radius: 4px; display: inline-block;">
-                    Restablecer Contraseña
+                   style="background-color: #007bff; color: white; padding: 15px 30px; 
+                          text-decoration: none; border-radius: 5px; display: inline-block; 
+                          font-weight: bold; font-size: 16px; border: none;">
+                    🔑 Restablecer Contraseña
                 </a>
             </div>
             
-            <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
-            <p style="background-color: #e9ecef; padding: 10px; border-radius: 4px; word-break: break-all;">
-                {reset_url}
-            </p>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-                <p style="color: #6c757d; font-size: 14px;">
-                    <strong>Importante:</strong>
-                    <br>• Este enlace expira en 24 horas
-                    <br>• Si no solicitaste este cambio, puedes ignorar este email
-                    <br>• Por tu seguridad, no compartas este enlace con nadie
+            <p style="color: #333; font-weight: bold; margin-top: 30px;">Si no puedes hacer clic en el botón, copia este enlace:</p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6; margin: 15px 0;">
+                <p style="color: #007bff; word-break: break-all; margin: 0; font-family: monospace;">
+                    {reset_url}
                 </p>
             </div>
             
-            <p style="color: #6c757d; font-size: 12px; text-align: center; margin-top: 20px;">
-                Sistema Numismático - Gestión de Colecciones
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                    <strong style="color: #dc3545;">⚠️ Importante:</strong><br>
+                    • Este enlace expira en 24 horas<br>
+                    • Si no solicitaste este cambio, ignora este email<br>
+                    • Por tu seguridad, no compartas este enlace
+                </p>
+            </div>
+            
+            <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
+                🪙 Sistema Numismático - Gestión de Colecciones
             </p>
         </div>
     </body>
     </html>
     """
     
-    # Estrategia de envío: EmailJS -> FormSubmit -> SendGrid -> SMTP
+    # Template de texto plano como fallback
+    plain_text = f"""
+    Hola {nombre},
+    
+    Recibimos una solicitud para restablecer tu contraseña.
+    
+    Haz clic en este enlace para restablecer tu contraseña:
+    {reset_url}
+    
+    Este enlace expira en 24 horas.
+    
+    Si no solicitaste este cambio, puedes ignorar este email.
+    
+    Sistema Numismático
+    """
+    
+    # Estrategia de envío: SMTP (temporal para debug) -> EmailJS -> FormSubmit -> SendGrid
     success = False
     
-    # 1. Intentar EmailJS primero (FUNCIONA, envío directo al usuario)
-    if os.getenv("EMAILJS_SERVICE_ID"):
-        logger.info("Intentando EmailJS como método principal...")
+    # 1. Usar SMTP directamente para evitar problemas de EmailJS
+    logger.info("Usando SMTP directamente para evitar problemas de formato...")
+    try:
+        success = send_email_smtp(
+            to_email=email,
+            subject=subject,
+            html_content=html_content
+        )
+        if success:
+            logger.info("✅ Email enviado exitosamente via SMTP")
+        else:
+            logger.warning("❌ SMTP falló, intentando EmailJS...")
+    except Exception as e:
+        logger.error(f"Error con SMTP: {e}")
+        success = False
+    
+    # 2. Si SMTP falla, intentar EmailJS
+    if not success and os.getenv("EMAILJS_SERVICE_ID"):
+        logger.info("Intentando EmailJS como alternativa...")
         success = send_email_emailjs(
             to_email=email,
             subject=subject,
-            html_content=html_content,
+            html_content=plain_text,  # Enviar solo texto plano a EmailJS
             nombre=nombre
         )
     
