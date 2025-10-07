@@ -17,9 +17,7 @@ class Billete(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     
-    # Campos originales
-    anverso = Column(String, nullable=False)
-    reverso = Column(String, nullable=False)
+    # Campos principales
     pais = Column(Integer, ForeignKey("paises.id"), nullable=False)
     denominacion = Column(String, nullable=False)
     precio = Column(String, nullable=False)

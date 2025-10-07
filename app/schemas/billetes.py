@@ -32,13 +32,11 @@ class Caracteristica(CaracteristicaBase):
         from_attributes = True
 
 class BilleteBase(BaseModel):
-    anverso: str
-    reverso: str
     pais: int
     denominacion: str = Field(..., min_length=1, max_length=100)
     precio: str = Field(..., min_length=1, max_length=50)
     
-    # Nuevos campos opcionales
+    # Campos de contenido
     banco_emisor: Optional[str] = Field(None, max_length=255)
     medidas: Optional[str] = Field(None, max_length=50)
     descripcion_anverso: Optional[str] = None
@@ -54,8 +52,6 @@ class BilleteCreate(BilleteBase):
     caracteristicas_ids: Optional[List[int]] = []
 
 class BilleteUpdate(BaseModel):
-    anverso: Optional[str] = None
-    reverso: Optional[str] = None
     pais: Optional[int] = None
     denominacion: Optional[str] = Field(None, min_length=1, max_length=100)
     precio: Optional[str] = Field(None, min_length=1, max_length=50)
