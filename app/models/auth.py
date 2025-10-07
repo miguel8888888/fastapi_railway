@@ -1,9 +1,16 @@
 from sqlalchemy import Column, String, Boolean, DateTime, Text, ForeignKey, Integer
-from sqlalchemy.dialects.postgresql import UUID, INET
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import uuid
-from app.database import Base
+from app.database import Base, SQLALCHEMY_DATABASE_URL
+
+# Usar String para IPs en SQLite, INET para PostgreSQL
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    IP_TYPE = String(45)  # IPv6 máximo: 45 caracteres
+else:
+    from sqlalchemy.dialects.postgresql import INET
+    IP_TYPE = INET
 
 class TokenRecuperacion(Base):
     __tablename__ = "tokens_recuperacion"
@@ -14,7 +21,7 @@ class TokenRecuperacion(Base):
     usado = Column(Boolean, default=False, index=True)
     fecha_expiracion = Column(DateTime(timezone=True), nullable=False, index=True)
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
-    ip_solicitante = Column(INET)
+    ip_solicitante = Column(IP_TYPE)
     user_agent = Column(Text)
 
     usuario = relationship("Usuario", backref="tokens_recuperacion")
@@ -25,7 +32,7 @@ class Sesion(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
     token_jwt = Column(Text, nullable=False)
-    ip_address = Column(INET)
+    ip_address = Column(IP_TYPE)
     user_agent = Column(Text)
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
     fecha_expiracion = Column(DateTime(timezone=True), nullable=False, index=True)
@@ -38,7 +45,7 @@ class IntentoLogin(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), index=True)
-    ip_address = Column(INET, index=True)
+    ip_address = Column(IP_TYPE, index=True)
     exitoso = Column(Boolean, default=False, index=True)
     fecha_intento = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     user_agent = Column(Text)
