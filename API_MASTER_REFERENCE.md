@@ -1,7 +1,7 @@
 # 🚀 API REFERENCE - SISTEMA DE BILLETES
 
 **Última Actualización:** 07 de October de 2025
-**Versión API:** 1.2.0  
+**Versión API:** 1.3.0  
 **Base URL:** `https://fastapi-railway-ihky.onrender.com`  
 
 ---
@@ -20,14 +20,15 @@
 | `/billetes/{id}/vendido` | PATCH | ✅ Sí | Marcar/desmarcar vendido |
 | `/billetes/stats` | GET | ❌ No | Estadísticas generales |
 | [🏷️ Características](#️-características) | | | |
-| `/caracteristicas/` | GET | ❌ No | Lista características |
-| `/caracteristicas/` | POST | ✅ Sí | Crear característica |
-| `/caracteristicas/{id}` | PUT | ✅ Sí | Actualizar característica |
-| `/caracteristicas/{id}` | DELETE | ✅ Sí | Eliminar característica |
+| `/billetes/caracteristicas/` | GET | ❌ No | Lista características |
+| `/billetes/caracteristicas/` | POST | ✅ Sí | Crear característica |
+| `/billetes/caracteristicas/{id}` | PUT | ✅ Sí | Actualizar característica |
+| `/billetes/caracteristicas/{id}` | DELETE | ✅ Sí | Eliminar característica |
 | [🌍 Países](#-países) | | | |
 | `/paises/` | GET | ❌ No | Lista países |
 | [🔐 Autenticación](#-autenticación) | | | |
 | `/auth/login` | POST | ❌ No | Iniciar sesión |
+| `/users/me` | GET | ✅ Sí | Perfil del usuario |
 | `/users/me` | GET | ✅ Sí | Perfil del usuario |
 
 ---
@@ -197,14 +198,30 @@ Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
+**Parámetros URL:**
+- `id` (int): ID del billete
+
 **Cuerpo:**
 ```json
 {
-  "destacado": true
+  "destacado": true  // boolean - true para destacar, false para quitar
 }
 ```
 
-**Respuesta 200:** (Billete actualizado)
+**Respuesta 200:**
+```json
+{
+  "id": 2,
+  "destacado": true,
+  "mensaje": "Billete marcado como destacado exitosamente",
+  "fecha_actualizacion": "2025-10-07T15:30:00Z"
+}
+```
+
+**Errores:**
+- `401`: No autenticado
+- `404`: Billete no encontrado
+- `422`: Error de validación
 
 ---
 
@@ -215,14 +232,30 @@ Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
+**Parámetros URL:**
+- `id` (int): ID del billete
+
 **Cuerpo:**
 ```json
 {
-  "vendido": true
+  "vendido": false  // boolean - true para marcar vendido, false para disponible
 }
 ```
 
-**Respuesta 200:** (Billete actualizado)
+**Respuesta 200:**
+```json
+{
+  "id": 2,
+  "vendido": false,
+  "mensaje": "Billete marcado como disponible exitosamente",
+  "fecha_actualizacion": "2025-10-07T15:30:00Z"
+}
+```
+
+**Errores:**
+- `401`: No autenticado
+- `404`: Billete no encontrado
+- `422`: Error de validación
 
 ---
 
@@ -489,6 +522,14 @@ Authorization: Bearer {jwt_token}  // Para endpoints protegidos
 ---
 
 ## 📝 **CHANGELOG**
+
+### **v1.3.0 - 7 de octubre de 2025**
+- ✅ Implementados endpoints PATCH para toggle de estados
+- ✅ Agregado `/billetes/{id}/destacado` y `/billetes/{id}/vendido`
+- ✅ Endpoint `/users/me` para perfil de usuario
+- ✅ Endpoint `/billetes/stats` público mejorado
+- ✅ Sistema de características completamente funcional
+- ✅ Respuestas estructuradas para toggles con mensajes
 
 ### **v1.2.0 - 7 de octubre de 2025**
 - ✅ Agregado sistema de características
