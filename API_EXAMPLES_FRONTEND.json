@@ -1,0 +1,357 @@
+{
+  "api_examples": {
+    "base_url": "https://fastapi-railway-ihky.onrender.com",
+    
+    "endpoints": {
+      
+      "list_billetes": {
+        "url": "/billetes/",
+        "method": "GET",
+        "description": "Lista paginada de billetes con filtros opcionales",
+        "parameters": {
+          "page": 1,
+          "page_size": 10,
+          "pais_id": 1,
+          "destacado": true,
+          "vendido": false,
+          "estado": "Excelente",
+          "search": "García"
+        },
+        "response_example": {
+          "billetes": [
+            {
+              "id": 1,
+              "pais": 1,
+              "denominacion": "50000",
+              "precio": "150000",
+              "banco_emisor": "Banco de la República de Colombia",
+              "medidas": "70 x 140 mm",
+              "descripcion_anverso": "Retrato de Gabriel García Márquez, escritor y premio Nobel de Literatura",
+              "descripcion_reverso": "Escenas de Macondo y referencias a sus obras literarias",
+              "url_anverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/anverso-50mil.jpeg",
+              "url_reverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/reverso-50mil.jpeg",
+              "pick": "P-458",
+              "estado": "Excelente",
+              "vendido": false,
+              "destacado": true,
+              "fecha_actualizacion": "2025-10-06T15:30:00.123456Z",
+              "caracteristicas": [
+                {
+                  "id": 1,
+                  "nombre": "Conmemorativo",
+                  "descripcion": "Billete de emisión especial conmemorativa",
+                  "color": "#007bff"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Histórico",
+                  "descripcion": "Billete de valor histórico significativo",
+                  "color": "#28a745"
+                }
+              ],
+              "pais_rel": {
+                "id": 1,
+                "pais": "Colombia",
+                "bandera": "🇨🇴"
+              }
+            }
+          ],
+          "total": 156,
+          "page": 1,
+          "page_size": 10,
+          "total_pages": 16,
+          "has_next": true,
+          "has_prev": false
+        }
+      },
+
+      "get_billete_by_id": {
+        "url": "/billetes/{id}",
+        "method": "GET",
+        "description": "Obtener un billete específico por ID",
+        "response_example": {
+          "id": 1,
+          "pais": 1,
+          "denominacion": "50000",
+          "precio": "150000",
+          "banco_emisor": "Banco de la República de Colombia",
+          "medidas": "70 x 140 mm",
+          "descripcion_anverso": "Retrato de Gabriel García Márquez, escritor y premio Nobel de Literatura colombiano. Se muestra con su característica sonrisa y mirada reflexiva, acompañado de elementos que evocan su universo literario.",
+          "descripcion_reverso": "Escenas inspiradas en Macondo, el pueblo ficticio de sus obras. Incluye mariposas amarillas, referencias a 'Cien años de soledad' y elementos del realismo mágico característico de su obra.",
+          "url_anverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/anverso-50mil.jpeg",
+          "url_reverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/reverso-50mil.jpeg",
+          "pick": "P-458",
+          "estado": "Excelente",
+          "vendido": false,
+          "destacado": true,
+          "fecha_actualizacion": "2025-10-06T15:30:00.123456Z",
+          "caracteristicas": [
+            {
+              "id": 1,
+              "nombre": "Conmemorativo",
+              "descripcion": "Billete de emisión especial conmemorativa",
+              "color": "#007bff"
+            }
+          ],
+          "pais_rel": {
+            "id": 1,
+            "pais": "Colombia",
+            "bandera": "🇨🇴"
+          }
+        }
+      },
+
+      "create_billete": {
+        "url": "/billetes/",
+        "method": "POST",
+        "description": "Crear un nuevo billete (requiere autenticación)",
+        "headers": {
+          "Authorization": "Bearer {jwt_token}",
+          "Content-Type": "application/json"
+        },
+        "request_body_example": {
+          "pais": 1,
+          "denominacion": "100000",
+          "precio": "300000",
+          "banco_emisor": "Banco Central de Argentina",
+          "medidas": "75 x 155 mm",
+          "descripcion_anverso": "Retrato de Eva Perón",
+          "descripcion_reverso": "Escenas del movimiento peronista",
+          "url_anverso": "https://example.com/eva-anverso.jpg",
+          "url_reverso": "https://example.com/eva-reverso.jpg",
+          "pick": "P-359",
+          "estado": "Bueno",
+          "vendido": false,
+          "destacado": false,
+          "caracteristicas_ids": [1, 3]
+        },
+        "response_example": {
+          "id": 157,
+          "pais": 1,
+          "denominacion": "100000",
+          "precio": "300000",
+          "banco_emisor": "Banco Central de Argentina",
+          "medidas": "75 x 155 mm",
+          "descripcion_anverso": "Retrato de Eva Perón",
+          "descripcion_reverso": "Escenas del movimiento peronista",
+          "url_anverso": "https://example.com/eva-anverso.jpg",
+          "url_reverso": "https://example.com/eva-reverso.jpg",
+          "pick": "P-359",
+          "estado": "Bueno",
+          "vendido": false,
+          "destacado": false,
+          "fecha_actualizacion": "2025-10-06T16:45:22.789012Z",
+          "caracteristicas": [
+            {
+              "id": 1,
+              "nombre": "Conmemorativo",
+              "descripcion": "Billete de emisión especial conmemorativa",
+              "color": "#007bff"
+            },
+            {
+              "id": 3,
+              "nombre": "Serie Limitada",
+              "descripcion": "Billete de tirada limitada",
+              "color": "#ffc107"
+            }
+          ],
+          "pais_rel": {
+            "id": 1,
+            "pais": "Argentina",
+            "bandera": "🇦🇷"
+          }
+        }
+      },
+
+      "list_caracteristicas": {
+        "url": "/caracteristicas/",
+        "method": "GET",
+        "description": "Lista todas las características disponibles",
+        "response_example": [
+          {
+            "id": 1,
+            "nombre": "Conmemorativo",
+            "descripcion": "Billete de emisión especial conmemorativa",
+            "color": "#007bff",
+            "fecha_creacion": "2025-10-06T10:00:00.000000Z"
+          },
+          {
+            "id": 2,
+            "nombre": "Raro",
+            "descripcion": "Billete poco común o difícil de encontrar",
+            "color": "#dc3545",
+            "fecha_creacion": "2025-10-06T10:00:00.000000Z"
+          },
+          {
+            "id": 3,
+            "nombre": "Serie Limitada",
+            "descripcion": "Billete de tirada limitada",
+            "color": "#ffc107",
+            "fecha_creacion": "2025-10-06T10:00:00.000000Z"
+          },
+          {
+            "id": 4,
+            "nombre": "Histórico",
+            "descripcion": "Billete de valor histórico significativo",
+            "color": "#28a745",
+            "fecha_creacion": "2025-10-06T10:00:00.000000Z"
+          }
+        ]
+      },
+
+      "estadisticas": {
+        "url": "/billetes/stats",
+        "method": "GET",
+        "description": "Estadísticas generales del sistema",
+        "response_example": {
+          "total_billetes": 156,
+          "total_vendidos": 23,
+          "total_disponibles": 133,
+          "total_destacados": 12,
+          "valor_total_inventario": "45750000",
+          "valor_inventario_disponible": "38900000",
+          "estadisticas_por_pais": {
+            "Colombia": {
+              "total": 89,
+              "vendidos": 12,
+              "disponibles": 77,
+              "valor_total": "25600000"
+            },
+            "Argentina": {
+              "total": 45,
+              "vendidos": 8,
+              "disponibles": 37,
+              "valor_total": "13400000"
+            },
+            "Brasil": {
+              "total": 22,
+              "vendidos": 3,
+              "disponibles": 19,
+              "valor_total": "6750000"
+            }
+          },
+          "estadisticas_por_estado": {
+            "Excelente": 67,
+            "Bueno": 78,
+            "Regular": 11,
+            "Malo": 0
+          },
+          "caracteristicas_mas_usadas": [
+            {
+              "caracteristica": "Histórico",
+              "nombre": "Histórico",
+              "color": "#28a745",
+              "cantidad_billetes": 34
+            },
+            {
+              "caracteristica": "Conmemorativo", 
+              "nombre": "Conmemorativo",
+              "color": "#007bff",
+              "cantidad_billetes": 28
+            }
+          ]
+        }
+      },
+
+      "authentication": {
+        "login": {
+          "url": "/auth/login",
+          "method": "POST",
+          "description": "Autenticación de usuario",
+          "request_body_example": {
+            "email": "admin@ejemplo.com",
+            "password": "mi_password_seguro"
+          },
+          "response_example": {
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkbWluQGVqZW1wbG8uY29tIiwiZXhwIjoxNjk2NjE2NDAwfQ.signature",
+            "token_type": "bearer",
+            "expires_in": 3600,
+            "user": {
+              "id": 1,
+              "email": "admin@ejemplo.com",
+              "nombre": "Administrador"
+            }
+          }
+        }
+      }
+    },
+
+    "validation_rules": {
+      "billete_creation": {
+        "required_fields": ["pais", "denominacion", "precio"],
+        "optional_fields": ["banco_emisor", "medidas", "descripcion_anverso", "descripcion_reverso", "url_anverso", "url_reverso", "pick", "estado", "vendido", "destacado", "caracteristicas_ids"],
+        "field_constraints": {
+          "denominacion": "min_length: 1, max_length: 100",
+          "precio": "min_length: 1, max_length: 50",
+          "banco_emisor": "max_length: 255",
+          "medidas": "max_length: 50",
+          "pick": "max_length: 50",
+          "estado": "enum: ['Excelente', 'Bueno', 'Regular', 'Malo']"
+        }
+      }
+    },
+
+    "error_responses": {
+      "validation_error": {
+        "status_code": 422,
+        "response_example": {
+          "detail": [
+            {
+              "loc": ["body", "denominacion"],
+              "msg": "field required",
+              "type": "value_error.missing"
+            },
+            {
+              "loc": ["body", "estado"],
+              "msg": "value is not a valid enumeration member; permitted: 'Excelente', 'Bueno', 'Regular', 'Malo'",
+              "type": "type_error.enum",
+              "ctx": {"enum_values": ["Excelente", "Bueno", "Regular", "Malo"]}
+            }
+          ]
+        }
+      },
+      "authentication_error": {
+        "status_code": 401,
+        "response_example": {
+          "detail": "Not authenticated"
+        }
+      },
+      "not_found_error": {
+        "status_code": 404,
+        "response_example": {
+          "detail": "Billete not found"
+        }
+      },
+      "permission_error": {
+        "status_code": 403,
+        "response_example": {
+          "detail": "Not enough permissions"
+        }
+      }
+    },
+
+    "frontend_integration_tips": {
+      "pagination": {
+        "description": "Siempre usar paginación en listados",
+        "recommended_page_size": 20,
+        "max_page_size": 100
+      },
+      "image_handling": {
+        "description": "Las URLs de imágenes pueden ser externas o relativas",
+        "fallback_image": "/assets/billete-placeholder.jpg"
+      },
+      "characteristics_display": {
+        "description": "Usar el color hexadecimal de cada característica para badges/tags",
+        "example_css": "background-color: {caracteristica.color}; color: white;"
+      },
+      "date_formatting": {
+        "description": "Las fechas vienen en formato ISO 8601 UTC",
+        "example": "2025-10-06T15:30:00.123456Z"
+      },
+      "search_implementation": {
+        "description": "El parámetro 'search' busca en denominación, banco_emisor y descripciones",
+        "debounce_recommendation": "300ms para mejor UX"
+      }
+    }
+  }
+}
