@@ -1,0 +1,16 @@
+{
+  "pais": 1,
+  "denominacion": "50000",
+  "precio": "150000",
+  "banco_emisor": "Banco de la República de Colombia",
+  "medidas": "70 x 140 mm",
+  "descripcion_anverso": "Retrato de Gabriel García Márquez, escritor y premio Nobel de Literatura",
+  "descripcion_reverso": "Escenas de Macondo y referencias a sus obras literarias",
+  "url_anverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/Reverso%2050%20mil.jpeg",
+  "url_reverso": "https://ljmwhelmcwtxbticvuwd.supabase.co/storage/v1/object/public/img-billetes/Reverso%2050%20mil.jpeg",
+  "pick": "P-458",
+  "estado": "Excelente",
+  "vendido": false,
+  "destacado": true,
+  "caracteristicas_ids": []
+}
