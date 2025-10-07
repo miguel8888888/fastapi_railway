@@ -2,10 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
-from decouple import config
 
-# Usar DATABASE_URL del archivo .env, con fallback a PostgreSQL para producción
-DATABASE_URL = config('DATABASE_URL', default="postgresql://db_numismatica_user:F0TkUKIbTcCBMyIofXnHyRHNNfEVU3Uy@dpg-d39jv3c9c44c73fjhrsg-a.oregon-postgres.render.com/db_numismatica")
+# Usar DATABASE_URL de variables de entorno, con fallback a PostgreSQL para producción
+DATABASE_URL = os.getenv('DATABASE_URL', "postgresql://db_numismatica_user:F0TkUKIbTcCBMyIofXnHyRHNNfEVU3Uy@dpg-d39jv3c9c44c73fjhrsg-a.oregon-postgres.render.com/db_numismatica")
 
 SQLALCHEMY_DATABASE_URL = DATABASE_URL
 
