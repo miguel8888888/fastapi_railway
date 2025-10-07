@@ -52,6 +52,7 @@ async def upload_file(file: UploadFile = File(...)):
 # Routers
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(users.user_router)  # Router público para /users/me
 app.include_router(pais.router)
 app.include_router(billetes.router)
 

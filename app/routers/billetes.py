@@ -4,7 +4,8 @@ from typing import Optional, List
 from app.database import get_db
 from app.schemas.billetes import (
     Billete, BilleteCreate, BilleteUpdate, BilleteFilter, BilleteListResponse, BilleteStatsResponse,
-    Caracteristica, CaracteristicaCreate, CaracteristicaUpdate, EstadoBillete
+    Caracteristica, CaracteristicaCreate, CaracteristicaUpdate, EstadoBillete,
+    BilleteDestacadoToggle, BilleteVendidoToggle, BilleteToggleResponse
 )
 from app.crud.billetes import (
     create_billete, get_billetes, get_billete, update_billete, delete_billete,
@@ -92,6 +93,11 @@ def api_get_billetes_stats(
     """Obtener estadísticas de billetes (requiere autenticación)"""
     return get_billetes_stats(db)
 
+@router.get("/stats")
+def api_get_billetes_stats_public(db: Session = Depends(get_db)):
+    """Obtener estadísticas de billetes (público, para frontend)"""
+    return get_billetes_stats(db)
+
 @router.get("/{billete_id}", response_model=Billete)
 def api_get_billete(billete_id: int, db: Session = Depends(get_db)):
     """Obtener un billete específico"""
@@ -124,6 +130,52 @@ def api_delete_billete(
     if not success:
         raise HTTPException(status_code=404, detail="Billete no encontrado")
     return {"message": "Billete eliminado exitosamente"}
+
+@router.patch("/{billete_id}/destacado", response_model=BilleteToggleResponse)
+def api_toggle_billete_destacado(
+    billete_id: int,
+    toggle_data: BilleteDestacadoToggle,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Marcar/desmarcar billete como destacado (requiere autenticación)"""
+    from app.crud.billetes import toggle_billete_destacado
+    
+    billete = toggle_billete_destacado(db, billete_id, toggle_data.destacado)
+    if not billete:
+        raise HTTPException(status_code=404, detail=f"Billete con ID {billete_id} no encontrado")
+    
+    mensaje = "Billete marcado como destacado" if toggle_data.destacado else "Billete desmarcado como destacado"
+    
+    return BilleteToggleResponse(
+        id=billete.id,
+        destacado=billete.destacado,
+        mensaje=f"{mensaje} exitosamente",
+        fecha_actualizacion=billete.fecha_actualizacion
+    )
+
+@router.patch("/{billete_id}/vendido", response_model=BilleteToggleResponse)
+def api_toggle_billete_vendido(
+    billete_id: int,
+    toggle_data: BilleteVendidoToggle,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Marcar/desmarcar billete como vendido (requiere autenticación)"""
+    from app.crud.billetes import toggle_billete_vendido
+    
+    billete = toggle_billete_vendido(db, billete_id, toggle_data.vendido)
+    if not billete:
+        raise HTTPException(status_code=404, detail=f"Billete con ID {billete_id} no encontrado")
+    
+    mensaje = "Billete marcado como vendido" if toggle_data.vendido else "Billete marcado como disponible"
+    
+    return BilleteToggleResponse(
+        id=billete.id,
+        vendido=billete.vendido,
+        mensaje=f"{mensaje} exitosamente",
+        fecha_actualizacion=billete.fecha_actualizacion
+    )
 
 # ==================== ENDPOINTS CARACTERÍSTICAS ====================
 

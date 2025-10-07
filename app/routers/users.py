@@ -19,6 +19,11 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
+# Router para endpoints públicos de usuario (sin prefix para compatibilidad con frontend)
+user_router = APIRouter(
+    tags=["Usuario Actual"]
+)
+
 @router.get("/", response_model=List[UserResponse])
 async def list_users(
     skip: int = 0,
@@ -104,3 +109,19 @@ async def reset_user_password_by_admin(
     """Resetear contraseña de usuario (admins)"""
     user = reset_user_password(db=db, user_id=user_id, password_data=password_data)
     return UserResponse.from_orm(user)
+
+# ==================== ENDPOINTS PÚBLICOS DE USUARIO ====================
+
+@user_router.get("/users/me", response_model=UserResponse)
+async def get_current_user_profile(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
+):
+    """Obtener perfil del usuario autenticado"""
+    # Actualizar último acceso
+    from sqlalchemy import func
+    current_user.ultimo_acceso = func.now()
+    db.commit()
+    db.refresh(current_user)
+    
+    return UserResponse.from_orm(current_user)

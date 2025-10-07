@@ -141,54 +141,99 @@ def get_billetes_destacados(db: Session, limit: int = 10):
     ).limit(limit).all()
 
 def get_billetes_stats(db: Session):
-    """Obtener estadísticas de billetes"""
+    """Obtener estadísticas completas de billetes según requerimientos del frontend"""
     total_billetes = db.query(Billete).count()
     total_vendidos = db.query(Billete).filter(Billete.vendido == True).count()
     total_disponibles = total_billetes - total_vendidos
     total_destacados = db.query(Billete).filter(Billete.destacado == True).count()
     
-    # Calcular valores totales manualmente (SQLite tiene problemas con CAST)
-    billetes_precios = db.query(Billete.precio).all()
-    valor_total = 0.0
-    for precio_tuple in billetes_precios:
+    # Calcular valores monetarios
+    billetes_todos = db.query(Billete.precio).all()
+    valor_total_inventario = 0.0
+    for precio_tuple in billetes_todos:
         try:
             precio_str = precio_tuple[0]
             if precio_str:
-                valor_total += float(precio_str)
-        except (ValueError, TypeError):
-            continue  # Ignorar precios que no se pueden convertir
-    
-    billetes_vendidos_precios = db.query(Billete.precio).filter(Billete.vendido == True).all()
-    valor_vendidos = 0.0
-    for precio_tuple in billetes_vendidos_precios:
-        try:
-            precio_str = precio_tuple[0]
-            if precio_str:
-                valor_vendidos += float(precio_str)
+                valor_total_inventario += float(precio_str)
         except (ValueError, TypeError):
             continue
     
-    # Billetes por país
-    billetes_por_pais = db.query(
-        Pais.pais.label('pais'),
-        func.count(Billete.id).label('cantidad')
-    ).join(Billete, Pais.id == Billete.pais).group_by(Pais.pais).all()
+    billetes_disponibles = db.query(Billete.precio).filter(Billete.vendido == False).all()
+    valor_inventario_disponible = 0.0
+    for precio_tuple in billetes_disponibles:
+        try:
+            precio_str = precio_tuple[0]
+            if precio_str:
+                valor_inventario_disponible += float(precio_str)
+        except (ValueError, TypeError):
+            continue
     
-    # Billetes por estado (usando SQL directo para evitar problemas con NULL)
-    billetes_por_estado = db.query(
+    # Estadísticas por país (formato requerido por frontend)
+    paises_stats = db.query(
+        Pais.pais.label('nombre_pais'),
+        func.count(Billete.id).label('total'),
+        func.sum(func.case((Billete.vendido == True, 1), else_=0)).label('vendidos'),
+        func.sum(func.case((Billete.vendido == False, 1), else_=0)).label('disponibles')
+    ).join(Billete, Pais.id == Billete.pais).group_by(Pais.pais, Pais.id).all()
+    
+    estadisticas_por_pais = {}
+    for pais_stat in paises_stats:
+        # Calcular valor total por país
+        valor_pais = db.query(func.sum(
+            func.cast(Billete.precio, func.Float)
+        )).join(Pais).filter(Pais.pais == pais_stat.nombre_pais).scalar() or 0
+        
+        estadisticas_por_pais[pais_stat.nombre_pais] = {
+            "total": int(pais_stat.total or 0),
+            "vendidos": int(pais_stat.vendidos or 0),
+            "disponibles": int(pais_stat.disponibles or 0),
+            "valor_total": f"{valor_pais:.2f}"
+        }
+    
+    # Estadísticas por estado
+    estados_stats = db.query(
         func.coalesce(Billete.estado, 'Sin Estado').label('estado'),
         func.count(Billete.id).label('cantidad')
     ).group_by(Billete.estado).all()
+    
+    estadisticas_por_estado = {}
+    for estado_stat in estados_stats:
+        estadisticas_por_estado[estado_stat.estado] = int(estado_stat.cantidad)
+    
+    # Características más usadas (Top 10)
+    caracteristicas_stats = db.query(
+        Caracteristica.nombre.label('caracteristica'),
+        Caracteristica.nombre.label('nombre'),
+        Caracteristica.color.label('color'),
+        func.count(billete_caracteristicas.c.billete_id).label('cantidad_billetes')
+    ).join(
+        billete_caracteristicas, Caracteristica.id == billete_caracteristicas.c.caracteristica_id
+    ).group_by(
+        Caracteristica.id, Caracteristica.nombre, Caracteristica.color
+    ).order_by(
+        func.count(billete_caracteristicas.c.billete_id).desc()
+    ).limit(10).all()
+    
+    caracteristicas_mas_usadas = [
+        {
+            "caracteristica": stat.caracteristica,
+            "nombre": stat.nombre,
+            "color": stat.color,
+            "cantidad_billetes": int(stat.cantidad_billetes)
+        }
+        for stat in caracteristicas_stats
+    ]
     
     return {
         "total_billetes": total_billetes,
         "total_vendidos": total_vendidos,
         "total_disponibles": total_disponibles,
         "total_destacados": total_destacados,
-        "valor_total_inventario": valor_total,
-        "valor_total_vendidos": valor_vendidos,
-        "billetes_por_pais": [{"pais": item.pais, "cantidad": item.cantidad} for item in billetes_por_pais],
-        "billetes_por_estado": [{"estado": item.estado, "cantidad": item.cantidad} for item in billetes_por_estado]
+        "valor_total_inventario": f"{valor_total_inventario:.2f}",
+        "valor_inventario_disponible": f"{valor_inventario_disponible:.2f}",
+        "estadisticas_por_pais": estadisticas_por_pais,
+        "estadisticas_por_estado": estadisticas_por_estado,
+        "caracteristicas_mas_usadas": caracteristicas_mas_usadas
     }
 
 # ==================== FUNCIONES CRUD CARACTERÍSTICAS ====================
@@ -236,8 +281,31 @@ def delete_caracteristica(db: Session, caracteristica_id: int):
         db.commit()
         return True
     return False
+
+# ==================== FUNCIONES TOGGLE BILLETES ====================
+
+def toggle_billete_destacado(db: Session, billete_id: int, destacado: bool):
+    """Cambiar estado destacado de un billete"""
     billete = db.query(Billete).filter(Billete.id == billete_id).first()
-    if billete:
-        db.delete(billete)
-        db.commit()
+    if not billete:
+        return None
+    
+    billete.destacado = destacado
+    billete.fecha_actualizacion = func.now()
+    
+    db.commit()
+    db.refresh(billete)
+    return billete
+
+def toggle_billete_vendido(db: Session, billete_id: int, vendido: bool):
+    """Cambiar estado de venta de un billete"""
+    billete = db.query(Billete).filter(Billete.id == billete_id).first()
+    if not billete:
+        return None
+    
+    billete.vendido = vendido
+    billete.fecha_actualizacion = func.now()
+    
+    db.commit()
+    db.refresh(billete)
     return billete

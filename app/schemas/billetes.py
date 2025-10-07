@@ -67,6 +67,19 @@ class BilleteUpdate(BaseModel):
     destacado: Optional[bool] = None
     caracteristicas_ids: Optional[List[int]] = None
 
+class BilleteDestacadoToggle(BaseModel):
+    destacado: bool = Field(..., description="True para destacar, False para quitar")
+
+class BilleteVendidoToggle(BaseModel):
+    vendido: bool = Field(..., description="True para marcar vendido, False para disponible")
+
+class BilleteToggleResponse(BaseModel):
+    id: int
+    destacado: Optional[bool] = None
+    vendido: Optional[bool] = None
+    mensaje: str
+    fecha_actualizacion: datetime
+
 class BilletePais(BaseModel):
     id: int
     pais: str
