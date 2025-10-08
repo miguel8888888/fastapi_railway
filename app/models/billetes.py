@@ -27,6 +27,7 @@ class Billete(Base):
     medidas = Column(String(50), nullable=True)
     descripcion_anverso = Column(Text, nullable=True)
     descripcion_reverso = Column(Text, nullable=True)
+    descripcion_general = Column(Text, nullable=True)  # Nueva columna para descripción general
     url_anverso = Column(Text, nullable=True)
     url_reverso = Column(Text, nullable=True)
     pick = Column(String(50), nullable=True, index=True)

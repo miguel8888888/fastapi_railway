@@ -41,6 +41,7 @@ class BilleteBase(BaseModel):
     medidas: Optional[str] = Field(None, max_length=50)
     descripcion_anverso: Optional[str] = None
     descripcion_reverso: Optional[str] = None
+    descripcion_general: Optional[str] = None
     url_anverso: Optional[str] = None
     url_reverso: Optional[str] = None
     pick: Optional[str] = Field(None, max_length=50)
@@ -59,6 +60,7 @@ class BilleteUpdate(BaseModel):
     medidas: Optional[str] = Field(None, max_length=50)
     descripcion_anverso: Optional[str] = None
     descripcion_reverso: Optional[str] = None
+    descripcion_general: Optional[str] = None
     url_anverso: Optional[str] = None
     url_reverso: Optional[str] = None
     pick: Optional[str] = Field(None, max_length=50)

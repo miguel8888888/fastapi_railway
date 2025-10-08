@@ -75,7 +75,7 @@ def get_billetes(
             )
         
         if filters.search:
-            # Búsqueda general en múltiples campos
+            # Búsqueda general en múltiples campos incluyendo descripción general
             search_term = f"%{filters.search}%"
             query = query.filter(
                 or_(
@@ -83,7 +83,8 @@ def get_billetes(
                     Billete.banco_emisor.ilike(search_term),
                     Billete.pick.ilike(search_term),
                     Billete.descripcion_anverso.ilike(search_term),
-                    Billete.descripcion_reverso.ilike(search_term)
+                    Billete.descripcion_reverso.ilike(search_term),
+                    Billete.descripcion_general.ilike(search_term)
                 )
             )
     
