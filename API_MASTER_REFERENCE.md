@@ -1,7 +1,7 @@
 # 🚀 API REFERENCE - SISTEMA DE BILLETES
 
 **Última Actualización:** 07 de October de 2025
-**Versión API:** 1.4.0  
+**Versión API:** 1.5.0  
 **Base URL:** `https://fastapi-railway-ihky.onrender.com`  
 
 ---
@@ -47,7 +47,7 @@ GET /billetes/
 - `denominacion` (str): Filtrar por denominación exacta
 - `precio_min` (float): Precio mínimo
 - `precio_max` (float): Precio máximo
-- `estado` (str): `"Excelente"` | `"Bueno"` | `"Regular"` | `"Malo"`
+- `estado` (str): `"Regular"` | `"Aceptable"` | `"Bueno"` | `"Muy bueno"` | `"Excelente"`
 - `vendido` (bool): true/false
 - `destacado` (bool): true/false
 - `pick` (str): Código Pick del billete
@@ -138,7 +138,7 @@ Content-Type: application/json
   "url_anverso": "https://example.com/anverso.jpg",
   "url_reverso": "https://example.com/reverso.jpg",
   "pick": "P-123",
-  "estado": "Excelente",
+  "estado": "Muy bueno",
   "vendido": false,
   "destacado": true,
   "caracteristicas_ids": [1, 2]
@@ -159,7 +159,7 @@ Content-Type: application/json
 - `url_anverso` (string)
 - `url_reverso` (string)
 - `pick` (string, máx 50 chars)
-- `estado` (enum: "Excelente", "Bueno", "Regular", "Malo")
+- `estado` (enum: "Regular", "Aceptable", "Bueno", "Muy bueno", "Excelente")
 - `vendido` (boolean)
 - `destacado` (boolean)
 - `caracteristicas_ids` (array de integers)
@@ -295,10 +295,11 @@ GET /billetes/stats
     }
   },
   "estadisticas_por_estado": {
-    "Excelente": 67,
+    "Regular": 5,
+    "Aceptable": 12,
     "Bueno": 78,
-    "Regular": 11,
-    "Malo": 0
+    "Muy bueno": 45,
+    "Excelente": 67
   },
   "caracteristicas_mas_usadas": [
     {
@@ -535,6 +536,12 @@ Authorization: Bearer {jwt_token}  // Para endpoints protegidos
 ---
 
 ## 📝 **CHANGELOG**
+
+### **v1.5.0 - 8 de octubre de 2025**
+- ✅ Actualizada escala de estados de billetes
+- ✅ Nuevos estados: "Regular", "Aceptable", "Bueno", "Muy bueno", "Excelente"
+- ✅ Migración automática de estados existentes
+- ✅ Documentación actualizada con nueva escala de calidad
 
 ### **v1.4.0 - 7 de octubre de 2025**
 - ✅ Agregado campo `descripcion_general` a la tabla billetes

@@ -1,8 +1,18 @@
 {
-  "version": "1.4.0",
-  "last_updated": "7 de octubre de 2025",
+  "version": "1.5.0",
+  "last_updated": "8 de octubre de 2025",
   "endpoints_count": 16,
   "changelog": [
+    {
+      "version": "1.5.0",
+      "date": "8 de octubre de 2025",
+      "changes": [
+        "Actualizada escala de estados de billetes",
+        "Nuevos estados: Regular, Aceptable, Bueno, Muy bueno, Excelente",
+        "Migración automática de estados existentes",
+        "Documentación actualizada con nueva escala de calidad"
+      ]
+    },
     {
       "version": "1.4.0",
       "date": "7 de octubre de 2025",

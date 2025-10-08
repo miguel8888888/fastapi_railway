@@ -4,10 +4,11 @@ from datetime import datetime
 from enum import Enum
 
 class EstadoBillete(str, Enum):
-    EXCELENTE = "Excelente"
-    BUENO = "Bueno" 
     REGULAR = "Regular"
-    MALO = "Malo"
+    ACEPTABLE = "Aceptable"
+    BUENO = "Bueno"
+    MUY_BUENO = "Muy bueno"
+    EXCELENTE = "Excelente"
 
 class CaracteristicaBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=100)
