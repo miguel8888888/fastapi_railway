@@ -1,6 +1,6 @@
 # 🚀 API REFERENCE - SISTEMA DE BILLETES
 
-**Última Actualización:** 07 de October de 2025
+**Última Actualización:** 08 de octubre de 2025
 **Versión API:** 1.5.0  
 **Base URL:** `https://fastapi-railway-ihky.onrender.com`  
 
